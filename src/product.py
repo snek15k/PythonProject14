@@ -14,6 +14,14 @@ class Product:
 
         Product.all_products.append(self)  # Добавляем товар в общий список
 
+    def __str__(self):
+        return f"{self.name}, {self.__price} руб. Остаток: {self.quantity} шт."
+
+    def __add__(self, other):
+        if not isinstance(other, Product):
+            raise TypeError("Складывать можно только объекты класса Product")
+        return self.__price * self.quantity + other.__price * other.quantity
+
     @property
     def price(self):
         """Геттер для получения цены товара."""
@@ -71,6 +79,10 @@ class Category:
         for product in products:
             self.add_product(product)
 
+    def __str__(self):
+        total_quantity = sum(product.quantity for product in self.__products)
+        return f"{self.name}, количество продуктов: {total_quantity} шт."
+
     def add_product(self, product: Product):
         """Добавляет продукт в категорию. Если товар уже есть, обновляет количество."""
         if not isinstance(product, Product):
@@ -91,7 +103,4 @@ class Category:
         if not self.__products:
             return "В категории нет товаров."
 
-        return "\n".join(
-            f"{product.name}, {product.price} руб. Остаток: {product.quantity} шт."
-            for product in self.__products
-        )
+        return "\n".join(str(product) for product in self.__products)

@@ -137,3 +137,38 @@ def test_add_product_invalid():
 
     with pytest.raises(TypeError, match="Можно добавлять только объекты класса Product"):
         category.add_product("Не продукт")  # Передаем строку вместо объекта Product
+
+
+def test_product_str():
+    """Тест строкового представления продукта"""
+    product = Product("MacBook Pro", "M3 Pro, 16GB RAM, 512GB SSD", 250000.0, 3)
+    assert str(product) == "MacBook Pro, 250000.0 руб. Остаток: 3 шт."
+
+
+def test_category_str():
+    """Тест строкового представления категории"""
+    product1 = Product("Iphone 15", "512GB, Gray space", 210000.0, 8)
+    product2 = Product("Xiaomi Redmi Note 11", "1024GB, Синий", 31000.0, 14)
+
+    category = Category("Смартфоны", "Категория смартфонов", [product1, product2])
+
+    assert str(category) == "Смартфоны, количество продуктов: 22 шт."
+
+
+def test_product_addition():
+    """Тест сложения двух продуктов"""
+    product1 = Product("Apple Watch", "Series 9", 45000.0, 5)
+    product2 = Product("AirPods Pro", "2nd Gen", 30000.0, 3)
+
+    total_value = product1 + product2
+    expected_value = 45000 * 5 + 30000 * 3  # 225000 + 90000 = 315000
+
+    assert total_value == expected_value
+
+
+def test_product_addition_invalid():
+    """Тест сложения продукта с невалидным объектом"""
+    product = Product("MacBook Air", "M2, 16GB RAM, 256GB SSD", 180000.0, 2)
+
+    with pytest.raises(TypeError, match="Складывать можно только объекты класса Product"):
+        result = product + "не продукт"
