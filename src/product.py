@@ -18,7 +18,7 @@ class Product:
         return f"{self.name}, {self.__price} руб. Остаток: {self.quantity} шт."
 
     def __add__(self, other):
-        if not isinstance(other, Product):
+        if type(self) is not type(other):  # Используем type() для проверки типа объектов
             raise TypeError("Складывать можно только объекты класса Product")
         return self.__price * self.quantity + other.__price * other.quantity
 
@@ -120,7 +120,7 @@ class Smartphone(Product):
                 f"{self.price} руб. Остаток: {self.quantity} шт.")
 
     def __add__(self, other):
-        if not isinstance(other, Smartphone):
+        if type(self) is not type(other):  # Используем type() для проверки типа объектов
             raise TypeError("Складывать можно только объекты класса Smartphone")
         return super().__add__(other)
 
@@ -139,6 +139,6 @@ class LawnGrass(Product):
                 f"{self.price} руб. Остаток: {self.quantity} шт.")
 
     def __add__(self, other):
-        if not isinstance(other, LawnGrass):
+        if type(self) is not type(other):  # Используем type() для проверки типа объектов
             raise TypeError("Складывать можно только объекты класса LawnGrass")
         return super().__add__(other)
