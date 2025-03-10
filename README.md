@@ -29,3 +29,8 @@ pip install -r requirements.txt
 
 ## Модуль product
 В этом модуле описаны классы product и category
+
+
+## Обновление модуля product
+В модуль были добавлены дочерние классы LawnGrass и Smartphone, расширяющие функционал
+родительского класса.

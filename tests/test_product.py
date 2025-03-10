@@ -1,5 +1,5 @@
 import pytest
-from src.product import Product, Category
+from src.product import Product, Category, Smartphone, LawnGrass
 
 
 def test_product_initialization():
@@ -172,3 +172,36 @@ def test_product_addition_invalid():
 
     with pytest.raises(TypeError, match="Складывать можно только объекты класса Product"):
         result = product + "не продукт"
+
+
+def test_smartphone_creation():
+    phone = Smartphone("iPhone", "Apple smartphone", 100000, 5, "High", "13 Pro", 256, "Blue")
+    assert phone.name == "iPhone"
+    assert phone.model == "13 Pro"
+    assert phone.memory == 256
+    assert phone.color == "Blue"
+    assert phone.price == 100000
+    assert phone.quantity == 5
+
+
+def test_lawngrass_creation():
+    grass = LawnGrass("Green Lawn", "Premium quality grass", 500, 20, "USA", 14, "Green")
+    assert grass.name == "Green Lawn"
+    assert grass.country == "USA"
+    assert grass.germination_period == 14
+    assert grass.color == "Green"
+    assert grass.price == 500
+    assert grass.quantity == 20
+
+
+def test_category_add_product():
+    phone = Smartphone("Samsung Galaxy", "Android smartphone", 80000, 3, "High", "S22", 128, "Black")
+    grass = LawnGrass("Luxury Lawn", "High-quality grass", 700, 15, "Canada", 10, "Light Green")
+    category = Category("Tech & Home", "Various products", [])
+
+    category.add_product(phone)
+    category.add_product(grass)
+
+    assert "Samsung Galaxy" in category.products
+    assert "Luxury Lawn" in category.products
+    assert Category.product_count == 8
