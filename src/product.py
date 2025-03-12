@@ -1,4 +1,14 @@
-class Product:
+from abc import ABC, abstractmethod
+
+
+class InitPrintMixin:
+    def __init__(self, *args, **kwargs):
+        class_name = self.__class__.__name__
+        print(f"Создан объект класса {class_name} с параметрами: {args}, {kwargs}")
+        super().__init__(*args, **kwargs)
+
+
+class BaseProduct(ABC):
     all_products = []  # Хранение всех созданных продуктов
 
     def __init__(self, name: str, description: str, price: float, quantity: int):
@@ -12,15 +22,15 @@ class Product:
         self.__price = price  # Приватный атрибут
         self.quantity = quantity
 
-        Product.all_products.append(self)  # Добавляем товар в общий список
+        BaseProduct.all_products.append(self)  # Добавляем товар в общий список
 
+    @abstractmethod
     def __str__(self):
-        return f"{self.name}, {self.__price} руб. Остаток: {self.quantity} шт."
+        pass
 
+    @abstractmethod
     def __add__(self, other):
-        if type(self) is not type(other):  # Используем type() для проверки типа объектов
-            raise TypeError("Складывать можно только объекты класса Product")
-        return self.__price * self.quantity + other.__price * other.quantity
+        pass
 
     @property
     def price(self):
@@ -35,35 +45,105 @@ class Product:
             return
 
         if new_price < self.__price:
-            confirm = input(f"Вы уверены, что хотите понизить цену с {self.__price} до {new_price}? (y/n): ")
+            confirm = input(
+                f"Вы уверены, что хотите понизить цену с {self.__price} до {new_price}? (y/n): "
+            )
             if confirm.lower() != "y":
                 print("Изменение цены отменено.")
                 return
 
         self.__price = new_price
 
+
+class Product(InitPrintMixin, BaseProduct):
     @classmethod
-    def new_product(cls, product_data: dict):
-        """
-        Создает новый объект Product на основе product_data.
-        Если товар с таким же именем уже существует в Product.all_products,
-        обновляет количество и выбирает наибольшую цену.
-        """
-        name = product_data.get("name")
-        description = product_data.get("description")
-        price = product_data.get("price")
-        quantity = product_data.get("quantity")
-
-        if not all([name, description, isinstance(price, (int, float)), isinstance(quantity, int)]):
-            raise ValueError("Некорректные данные для создания продукта")
-
+    def new_product(cls, product_data):
+        # Проверяем, существует ли уже продукт с таким именем
         for product in cls.all_products:
-            if product.name == name:
-                product.quantity += quantity
-                product.price = max(product.price, price)
-                return product
+            if product.name == product_data["name"]:
+                # Обновляем количество товара
+                product.quantity += product_data["quantity"]
+                # Если новая цена выше текущей, обновляем её
+                if product_data["price"] > product.price:
+                    product.price = product_data["price"]
+                return product  # Возвращаем обновленный объект, не создавая новый
 
-        return cls(name, description, price, quantity)
+        # Если такого продукта нет, создаём новый
+        new_product = cls(
+            name=product_data["name"],
+            description=product_data["description"],
+            price=product_data["price"],
+            quantity=product_data["quantity"],
+        )
+        cls.all_products.append(new_product)
+        return new_product
+
+    def __str__(self):
+        return f"{self.name}, {self.price} руб. Остаток: {self.quantity} шт."
+
+    def __add__(self, other):
+        if not isinstance(other, Product):
+            raise TypeError("Складывать можно только объекты класса Product")
+        return self.price * self.quantity + other.price * other.quantity
+
+
+class Smartphone(Product):
+    def __init__(
+        self,
+        name: str,
+        description: str,
+        price: float,
+        quantity: int,
+        efficiency: str,
+        model: str,
+        memory: int,
+        color: str,
+    ):
+        super().__init__(name, description, price, quantity)
+        self.efficiency = efficiency
+        self.model = model
+        self.memory = memory
+        self.color = color
+
+    def __str__(self):
+        return (
+            f"{self.name} ({self.model}), {self.memory}GB, {self.color}, "
+            f"{self.price} руб. Остаток: {self.quantity} шт."
+        )
+
+    def __add__(self, other):
+        if not isinstance(other, Smartphone):
+            raise TypeError("Складывать можно только объекты класса Smartphone")
+        return super().__add__(other)
+
+
+class LawnGrass(Product):
+    def __init__(
+        self,
+        name: str,
+        description: str,
+        price: float,
+        quantity: int,
+        country: str,
+        germination_period: int,
+        color: str,
+    ):
+        super().__init__(name, description, price, quantity)
+        self.country = country
+        self.germination_period = germination_period
+        self.color = color
+
+    def __str__(self):
+        return (
+            f"{self.name} ({self.color}), из {self.country}, "
+            f"прорастает за {self.germination_period} дней, "
+            f"{self.price} руб. Остаток: {self.quantity} шт."
+        )
+
+    def __add__(self, other):
+        if not isinstance(other, LawnGrass):
+            raise TypeError("Складывать можно только объекты класса LawnGrass")
+        return super().__add__(other)
 
 
 class Category:
@@ -86,7 +166,9 @@ class Category:
     def add_product(self, product: Product):
         """Добавляет продукт в категорию. Проверяет, является ли объект наследником Product."""
         if not isinstance(product, Product):
-            raise TypeError("Можно добавлять только объекты класса Product или его наследников")
+            raise TypeError(
+                "Можно добавлять только объекты класса Product или его наследников"
+            )
 
         for existing_product in self.__products:
             if existing_product.name == product.name:
@@ -104,41 +186,3 @@ class Category:
             return "В категории нет товаров."
 
         return "\n".join(str(product) for product in self.__products)
-
-
-class Smartphone(Product):
-    def __init__(self, name: str, description: str, price: float, quantity: int,
-                 efficiency: str, model: str, memory: int, color: str):
-        super().__init__(name, description, price, quantity)
-        self.efficiency = efficiency
-        self.model = model
-        self.memory = memory
-        self.color = color
-
-    def __str__(self):
-        return (f"{self.name} ({self.model}), {self.memory}GB, {self.color}, "
-                f"{self.price} руб. Остаток: {self.quantity} шт.")
-
-    def __add__(self, other):
-        if type(self) is not type(other):  # Используем type() для проверки типа объектов
-            raise TypeError("Складывать можно только объекты класса Smartphone")
-        return super().__add__(other)
-
-
-class LawnGrass(Product):
-    def __init__(self, name: str, description: str, price: float, quantity: int,
-                 country: str, germination_period: int, color: str):
-        super().__init__(name, description, price, quantity)
-        self.country = country
-        self.germination_period = germination_period
-        self.color = color
-
-    def __str__(self):
-        return (f"{self.name} ({self.color}), из {self.country}, "
-                f"прорастает за {self.germination_period} дней, "
-                f"{self.price} руб. Остаток: {self.quantity} шт.")
-
-    def __add__(self, other):
-        if type(self) is not type(other):  # Используем type() для проверки типа объектов
-            raise TypeError("Складывать можно только объекты класса LawnGrass")
-        return super().__add__(other)
