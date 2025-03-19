@@ -23,10 +23,11 @@ def test_product_invalid_price():
 
 
 def test_product_invalid_quantity():
-    """Тест создания продукта с отрицательным количеством"""
-    with pytest.raises(
-        ValueError, match="Количество товара не может быть отрицательным"
-    ):
+    """Тест создания продукта с нулевым или отрицательным количеством"""
+    with pytest.raises(ValueError, match="Товар с нулевым количеством не может быть добавлен"):
+        Product("Test Product", "Description", 100, 0)
+
+    with pytest.raises(ValueError, match="Товар с нулевым количеством не может быть добавлен"):
         Product("Test Product", "Description", 100, -5)
 
 
@@ -284,14 +285,6 @@ def test_product_price_cannot_be_negative():
         Product("Test Product", "Description", -100, 10)
 
 
-def test_product_quantity_cannot_be_negative():
-    """Тест, что количество товара не может быть отрицательным"""
-    with pytest.raises(
-        ValueError, match="Количество товара не может быть отрицательным"
-    ):
-        Product("Test Product", "Description", 100, -5)
-
-
 def test_product_price_setter_negative():
     """Тест сеттера цены при попытке установить отрицательное значение"""
     product = Product("Test Product", "Description", 100, 10)
@@ -379,3 +372,36 @@ def test_lawn_grass_addition_invalid():
         TypeError, match="Складывать можно только объекты класса LawnGrass"
     ):
         result = grass + "не газон"
+
+
+def test_base_product_zero_quantity():
+    """Проверка, что нельзя создать товар с нулевым количеством."""
+    with pytest.raises(ValueError, match="Товар с нулевым количеством не может быть добавлен"):
+        Product("Тестовый товар", "Описание", 100, 0)
+
+
+def test_middle_price():
+    """Проверка вычисления среднего ценника товаров в категории."""
+    category = Category("Электроника", "Различные гаджеты", [])
+
+    # Проверяем, что при отсутствии товаров средняя цена = 0
+    assert category.middle_price() == 0
+
+    # Добавляем товары
+    product1 = Product("Товар 1", "Описание 1", 100, 5)
+    product2 = Product("Товар 2", "Описание 2", 200, 3)
+
+    category.add_product(product1)
+    category.add_product(product2)
+
+    # Средняя цена: (100 + 200) / 2 = 150
+    assert category.middle_price() == 150
+
+
+def test_middle_price_with_one_product():
+    """Проверка среднего ценника с одним товаром."""
+    category = Category("Одежда", "Мужская одежда", [])
+    product = Product("Футболка", "Хлопок", 500, 10)
+    category.add_product(product)
+
+    assert category.middle_price() == 500

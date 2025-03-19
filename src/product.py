@@ -14,8 +14,8 @@ class BaseProduct(ABC):
     def __init__(self, name: str, description: str, price: float, quantity: int):
         if price <= 0:
             raise ValueError("Цена не должна быть нулевая или отрицательная")
-        if quantity < 0:
-            raise ValueError("Количество товара не может быть отрицательным")
+        if quantity <= 0:  # Теперь проверяем и нулевое количество
+            raise ValueError("Товар с нулевым количеством не может быть добавлен")
 
         self.name = name
         self.description = description
@@ -186,3 +186,12 @@ class Category:
             return "В категории нет товаров."
 
         return "\n".join(str(product) for product in self.__products)
+
+    def middle_price(self):
+        """Подсчитывает средний ценник всех товаров в категории."""
+        try:
+            total_price = sum(product.price for product in self.__products)
+            total_products = len(self.__products)
+            return total_price / total_products
+        except ZeroDivisionError:
+            return 0  # Если товаров нет, возвращаем 0 вместо ошибки
