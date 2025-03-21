@@ -405,12 +405,3 @@ def test_middle_price_with_one_product():
     category.add_product(product)
 
     assert category.middle_price() == 500
-
-
-def test_middle_price_with_one_product_1():
-    """Проверка среднего ценника с одним товаром."""
-    category = Category("Одежда", "Мужская одежда", [])
-    product = Product("Футболка", "Хлопок", 500, 10)
-    category.add_product(product)
-
-    assert category.middle_price() == 500
